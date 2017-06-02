@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+    <title>BudgetWeb</title>
+
+    <!-- стили -->
+    <link href="css/lib/icon.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="css/lib/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+
+<body>
+
+
+<div class="row">
+    <div class="col s12">
+        <div class="section card-panel z-depth-4">
+            <h4 class="center-align">BudgetWeb</h4>
+        </div>
+    </div>
+
+    <div class="col s3">
+        <div class="section card-panel z-depth-4">
+            <h5 class="center-align spacer">Настройки</h5>
+            <div class="row">
+                <form id="settings" class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="login" class="validate" type="text" name="login" >
+                            <label for="login">Логин</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="password" class="validate" type="password" name="password" pattern="^[^\u0022'`]{4,40}$">
+                            <label for="password" data-error="Длина пароля от 4 до 40 символов">Пароль</label>
+                        </div>
+                    </div>
+                    <div class="right-align">
+                        <button id="save-settings" class="btn waves-effect waves-light" type="submit">Сохранить
+                            <i class="material-icons right">save</i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col s4">
+        <div class="section card-panel z-depth-4">
+            <h5 class="center-align spacer">Расходы в текущем месяце</h5>
+            <div id="categories-table" class="collection">
+                <a class="js-category collection-item pointer" data-id="food">Питание</a>
+                <a class="js-category collection-item pointer" data-id="life">Быт</a>
+                <a class="js-category collection-item pointer" data-id="other">Прочее</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col s5">
+        <div class="section card-panel z-depth-4">
+            <h5 class="center-align spacer">
+                <span>Категория: </span>
+                <span id="category-name" data-field="category">не выбрана</span>
+            </h5>
+            <ul id="category-items" class="collection"></ul>
+            <div class="right-align">
+                <button id="add-category-item" class="btn waves-effect waves-light">Добавить расход
+                    <i class="material-icons right">add</i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- модальное окно -->
+<div id="modal" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        <h5>Добавление элемента</h5>
+        <form id="item-params" class="col s12">
+            <input class="hide" type="text" name="id">
+            <div class="row no-m-b">
+                <div class="input-field col s12">
+                    <select id="params-category" name="category">
+                        <option value="" disabled selected>Выберите категорию</option>
+                        <option value="Питание">Питание</option>
+                        <option value="Быт">Быт</option>
+                        <option value="Прочее">Прочее</option>
+                    </select>
+                    <label for="params-category">Категория</label>
+                </div>
+            </div>
+            <div class="row no-m-b">
+                <div class="input-field col s12">
+                    <input id="params-cost" class="validate" type="number" name="cost" >
+                    <label for="params-cost">Стоимость</label>
+                </div>
+            </div>
+            <div class="row no-m-b">
+                <div class="input-field col s12">
+                    <input id="params-comment" type="text" name="comment">
+                    <label for="params-comment">Комментарий</label>
+                </div>
+            </div>
+            <div class="row no-m-b">
+                <div class="input-field col s12">
+                    <input id="params-date" class="datepicker" type="date" name="date">
+                    <label for="params-date">Дата</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button id="item-params-save" class="btn waves-effect waves-light">Сохранить
+            <i class="material-icons right">save</i>
+        </button>
+        <button id="item-params-cancel" class="modal-action modal-close btn waves-effect waves-light right-spacer">Отмена
+            <i class="material-icons right">replay</i>
+        </button>
+    </div>
+</div>
+
+<!-- скрипты -->
+<script src="js/lib/jquery-3.2.1.min.js"></script>
+<script src="js/lib/materialize.min.js"></script>
+<script src="js/init-materialize.js"></script>
+<script src="js/utility.js"></script>
+<script src="js/logic.js"></script>
+</body>
+
+</html>

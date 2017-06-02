@@ -1,0 +1,19 @@
+.down-spacer {
+    margin-bottom: 20px !important;
+}
+
+.right-spacer {
+    margin-right: 20px !important;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.no-m-b {
+    margin-bottom: 0 !important;
+}
+
+.no-p-l {
+    padding-left: 0 !important;
+}
