@@ -39,7 +39,7 @@
                         </div>
                     </div>
                     <div class="right-align">
-                        <button id="save-settings" class="btn waves-effect waves-light" type="submit">Сохранить
+                        <button id="save-settings" class="btn waves-effect waves-light" type="submit">Логин
                             <i class="material-icons right">save</i>
                         </button>
                     </div>
@@ -51,11 +51,7 @@
     <div class="col s4">
         <div class="section card-panel z-depth-4">
             <h5 class="center-align spacer">Расходы в текущем месяце</h5>
-            <div id="categories-table" class="collection">
-                <a class="js-category collection-item pointer" data-id="food">Питание</a>
-                <a class="js-category collection-item pointer" data-id="life">Быт</a>
-                <a class="js-category collection-item pointer" data-id="other">Прочее</a>
-            </div>
+            <div id="categories-table" class="collection"></div>
         </div>
     </div>
 
@@ -94,19 +90,19 @@
             </div>
             <div class="row no-m-b">
                 <div class="input-field col s12">
-                    <input id="params-cost" class="validate" type="number" name="cost" >
+                    <input id="params-cost" class="validate" type="number" name="cost" placeholder=" ">
                     <label for="params-cost">Стоимость</label>
                 </div>
             </div>
             <div class="row no-m-b">
                 <div class="input-field col s12">
-                    <input id="params-comment" type="text" name="comment">
+                    <input id="params-comment" type="text" name="comment" placeholder=" ">
                     <label for="params-comment">Комментарий</label>
                 </div>
             </div>
             <div class="row no-m-b">
                 <div class="input-field col s12">
-                    <input id="params-date" class="datepicker" type="date" name="date">
+                    <input id="params-date" class="datepicker" type="date" name="date" placeholder=" ">
                     <label for="params-date">Дата</label>
                 </div>
             </div>

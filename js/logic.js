@@ -1,10 +1,4 @@
 ;(function () {
-
-    var saveSettingBtn = document.querySelector('#save-settings');
-    var addCategoryItemBtn = document.querySelector('#add-category-item');
-    var itemParamsSaveBtn = document.querySelector('#item-params-save');
-    var itemParamsCancelBtn = document.querySelector('#item-params-cancel');
-
     /**
      * Получение данных формы
      * @param {HTMLElement} form - форма
@@ -26,13 +20,78 @@
     }
 
     /**
-     * Сохранение настроек
+     * Вход в систему
      * сюда нужно будет прикрутить запрос к серверу
      * @param {Object} event - событие
      */
-    function saveSettings(event) {
+    function login(event) {
         var data = formHandler(this.form);
         this.form.reset();
+
+        // пример данных для отрисовки категорий
+        // после впиливания серверной логики - переделать
+        var example = [
+            {
+                id: 'food',
+                name: 'Питание',
+                total: 650
+            },
+            {
+                id: 'life',
+                name: 'Быт',
+                total: 500
+            },
+            {
+                id: 'other',
+                name: 'Прочее',
+                total: 2500
+            }
+        ];
+        drawCategories(example);
+    }
+
+    /**
+     * Отрисовывает все категории
+     * @param {Array.<Object>} data - массив элементов категории
+     */
+    function drawCategories(data) {
+        var table = document.querySelector('#categories-table');
+        table.innerHTML = '';
+        table.insertAdjacentHTML('afterBegin', getAllItemsHTMLString(data, getCategoryHTMLString));
+        switchCategory();
+    }
+
+    /**
+     * Формирует строку HTML-кода для всех элементов массива по заданному методу
+     * @param {Array.<Object>} data - массив элементов категории
+     * @param {Function} method - метод для отрисовки одного элемента
+     * @returns {String} - строка HTML-кода
+     */
+    function getAllItemsHTMLString(data, method) {
+        if (!data || !data.length ||!method ||
+            Object.prototype.toString.call(method) !== '[object Function]') return '';
+
+        var str = '', i = 0, l = data.length;
+        for (i; i < l; i++) {
+            str += method(data[i]);
+        }
+
+        return str;
+    }
+
+    /**
+     * Формирует строку HTML-кода для одной категории
+     * @param {Object} item - категория
+     * @returns {String} - строка HTML-кода
+     */
+    function getCategoryHTMLString(item) {
+        // если будут косяки с поддержкой браузером такого формата строк,
+        // заменить на обычные с конкатенацией
+        return `
+            <a class="js-category collection-item pointer" data-id="${item.id}">
+                <span>${item.name}</span>
+                <span class="right">${item.total}</span>
+            </a>`;
     }
 
     /**
@@ -151,25 +210,9 @@
         categoryNameWrap.setAttribute('data-value', categoryName);
 
         table.innerHTML = '';
-        table.insertAdjacentHTML('afterBegin', getHTMLString(data));
+        table.insertAdjacentHTML('afterBegin', getAllItemsHTMLString(data, getItemHTMLString));
 
         addItemsHandlers(table);
-    }
-
-    /**
-     * Формирует строку HTML-кода для всех элементов в категории
-     * @param {Array.<Object>} data - массив элементов категории
-     * @returns {String} - строка HTML-кода
-     */
-    function getHTMLString(data) {
-        if (!data || !data.length) return '';
-
-        var str = '', i = 0, l = data.length;
-        for (i; i < l; i++) {
-            str += getHTMLElementString(data[i]);
-        }
-
-        return str;
     }
 
     /**
@@ -177,7 +220,7 @@
      * @param {Object} item - элемент категории
      * @returns {String} - строка HTML-кода
      */
-    function getHTMLElementString(item) {
+    function getItemHTMLString(item) {
         // если будут косяки с поддержкой браузером такого формата строк,
         // заменить на обычные с конкатенацией
         return `
@@ -253,11 +296,21 @@
      * @param {Object} data - событие
      */
     function setFormFields(form, data) {
-        var key, input;
+        var key, elem, value;
+        // фейковый инпут категории, в него нужно ставить занчение select'а
+        var fakeInput = form.querySelector('.select-dropdown');
         for (key in data) {
-            input = form.querySelector('[name="' + key + '"]');
-            if (input) {
-                input.value = data[key];
+            value = data[key];
+            if (key === 'date') {
+                value = new Date(value).toLocaleDateString();
+            }
+
+            elem = form.querySelector('[name="' + key + '"]');
+            if (elem) {
+                elem.value = value;
+                if (elem.tagName === 'SELECT') {
+                    fakeInput.value = value;
+                }
             }
         }
     }
@@ -303,22 +356,26 @@
             var item = idField.parent('js-item');
             var wrap = document.createElement('div');
 
-            wrap.insertAdjacentHTML('afterBegin', getHTMLElementString(data));
+            wrap.insertAdjacentHTML('afterBegin', getItemHTMLString(data));
             item.parentNode.replaceChild(wrap.firstElementChild, item);
         } else {
-            table.insertAdjacentHTML('beforeEnd', getHTMLElementString(data));
+            table.insertAdjacentHTML('beforeEnd', getItemHTMLString(data));
         }
 
         closeModal();
         addItemsHandlers(table);
     }
 
-    // вызов методов после полной загрузки страницы
+    // привязываем обработчики после полной загрузки страницы
     // т.к. скрипт подключен внизу body,
     // то явно навешивать на onload не нужно
-    saveSettingBtn.onclick = saveSettings;
+    var saveSettingBtn = document.querySelector('#save-settings');
+    var addCategoryItemBtn = document.querySelector('#add-category-item');
+    var itemParamsSaveBtn = document.querySelector('#item-params-save');
+    var itemParamsCancelBtn = document.querySelector('#item-params-cancel');
+
+    saveSettingBtn.onclick = login;
     addCategoryItemBtn.onclick = openModal;
     itemParamsSaveBtn.onclick = editCategoryItem;
     itemParamsCancelBtn.onclick = closeModal;
-    switchCategory();
 })();
