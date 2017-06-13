@@ -242,8 +242,8 @@
     }
 
     /**
-     * Редактирование элемента категории
-     * сюда нужно будет прикрутить запрос к серверу
+     * Находит все элементы таблицы и вешает на каждый обработчики
+     * редактирования и удаления
      * @param {HTMLElement} table - таблица элементов категории
      */
     function addItemsHandlers(table) {
@@ -267,17 +267,16 @@
      * @param {Object} event - событие
      */
     function editItem(event) {
-        var modal = document.querySelector('#item-params');
-        var item = this.parent('js-item');
-        var data = getItemData(item);
+        var modal = document.querySelector('#item-params'); // получили модальное окно
+        var item = this.parent('js-item'); // получили элемент, на котором сработало событие
+        var data = getItemData(item); // получили данные этого элемента
 
-        setFormFields(modal, data);
-        openModal();
+        setFormFields(modal, data); // заполнили модальное окно данными
+        openModal(); // открыли модальное окно
     }
 
     /**
-     * Редактирование элемента категории
-     * сюда нужно будет прикрутить запрос к серверу
+     * Получиение данных конкретного ээлемента категории
      * @param {HTMLElement} item - событие
      * @returns {Object} - данные элемента категории
      */
@@ -347,23 +346,23 @@
      * сюда нужно будет прикрутить запрос к серверу
      */
     function editCategoryItem() {
-        var table = document.querySelector('#category-items');
-        var modal = document.querySelector('#item-params');
-        var data = formHandler(modal);
+        var table = document.querySelector('#category-items'); // таблица элементов категории
+        var modal = document.querySelector('#item-params'); // форма из модального окна
+        var data = formHandler(modal); // получили данные из этой формы
 
-        if (data.id) {
+        if (data.id) { // значит это редактирование старого элемента категории
             var idField = table.querySelector('[data-field="id"][data-value="'+ data.id +'"]');
             var item = idField.parent('js-item');
             var wrap = document.createElement('div');
 
             wrap.insertAdjacentHTML('afterBegin', getItemHTMLString(data));
             item.parentNode.replaceChild(wrap.firstElementChild, item);
-        } else {
+        } else { // значит добавляем новый элемент
             table.insertAdjacentHTML('beforeEnd', getItemHTMLString(data));
         }
 
-        closeModal();
-        addItemsHandlers(table);
+        closeModal(); // закрываем модальное окно
+        addItemsHandlers(table); // вешаем на элементы категгории обработчики
     }
 
     // привязываем обработчики после полной загрузки страницы
