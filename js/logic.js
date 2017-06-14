@@ -1,4 +1,9 @@
 ;(function () {
+
+    var token = "";
+    var categories = ["food", "life", "other"];
+    var categoriesRus = ["Питание", "Быт", "Прочие"];
+
     /**
      * Получение данных формы
      * @param {HTMLElement} form - форма
@@ -21,15 +26,47 @@
 
     /**
      * Вход в систему
-     * сюда нужно будет прикрутить запрос к серверу
+     * API Client: auth, get categories
      * @param {Object} event - событие
      */
     function login(event) {
         var data = formHandler(this.form);
-        this.form.reset();
+        //this.form.reset();
+	
+	var request = "/api/user/?login=" + data['login'] + "&password=" + data['password'];
+	console.log( request );
+	$.ajax({
+		url: request,
+		type: "GET",
+		success: function(data) { 
+			recive = JSON.parse(data);
+			if(recive["code"] == 200){
+				// if ok - save recived token
+				console.log(recive);
+				token = recive["data"];
+				
+				// and load total values for categories
+				var request = "/api/categories/?token=" + token;
+                		$.ajax({
+               		        	url: request,
+               			        type: "GET",
+                		        success: function(data){
+						console.log(data["data"]);
+						recive = data["data"];
+						recive[0]["id"] = 'food'; recive[1]["id"]='life'; recive[2]["id"]='other';
+						//console.log(recive);
+						drawCategories(recive);
+					},
+		                        error:   function(data) {alert("Ошибка: "+data); }
+                		});
+			}else{
+				alert("Ошибка: " + recive["data"]);
+			} 
+		},
+		error:	 function(data) {alert("Ошибка: "+data); }
+	});
 
-        // пример данных для отрисовки категорий
-        // после впиливания серверной логики - переделать
+/*
         var example = [
             {
                 id: 'food',
@@ -47,7 +84,7 @@
                 total: 2500
             }
         ];
-        drawCategories(example);
+*/
     }
 
     /**
@@ -128,7 +165,7 @@
 
     /**
      * Загружает данные конкретной категории
-     * сюда нужно будет прикрутить запрос к серверу
+     * API Client: get items
      * @param {String} category - идентификатор категории
      */
     function loadCategoryData(category) {
@@ -136,9 +173,28 @@
         var categoryNameWrap = document.querySelector('#category-name');
         var categoryName;
 
-        // пример данных для отрисовки элементов категории
-        // после впиливания серверной логики - переделать
-        var data = [];
+	var d = new Date();
+	var request = "/api/item/?token="+token+"&m="+(d.getMonth()+1)+"&y="+d.getFullYear()+"&cat="+(categories.indexOf(category)+1);
+	console.log(request);
+	$.ajax({
+		url: request,
+		type: "GET",
+		success: function(data){
+			//console.log(data);
+			recived = JSON.parse(data)["data"];
+			categoryName = categoriesRus[categories.indexOf(category)] //data.length ? data[0].category : '';
+		        categoryNameWrap.innerText = categoryName;
+		        categoryNameWrap.setAttribute('data-value', categoryName);
+
+		        table.innerHTML = '';
+		        table.insertAdjacentHTML('afterBegin', getAllItemsHTMLString(recived, getItemHTMLString));
+
+		        addItemsHandlers(table);
+		},
+		error: function(data){ alert("Ошибка "+data ) } 
+	});
+
+/*        var data = [];
         switch (category) {
             case 'food':
                 data = [
@@ -203,16 +259,8 @@
                 break;
 
             // no default
-        }
-
-        categoryName = data.length ? data[0].category : '';
-        categoryNameWrap.innerText = categoryName;
-        categoryNameWrap.setAttribute('data-value', categoryName);
-
-        table.innerHTML = '';
-        table.insertAdjacentHTML('afterBegin', getAllItemsHTMLString(data, getItemHTMLString));
-
-        addItemsHandlers(table);
+        } 
+	*/
     }
 
     /**
@@ -226,10 +274,10 @@
         return `
             <li class="collection-item js-item">
                 <span class="hide" data-field="id" data-value="${item.id}"></span>
-                <span class="hide" data-field="category" data-value="${item.category}"></span>
+                <span class="hide" data-field="category" data-value="${categoriesRus[item.category]}"></span>
                 <div class="row valign-wrapper no-m-b">
                     <div class="col s10 no-p-l">
-                        <div data-field="comment" data-value="${item.comment}">${item.comment}</div>
+                        <div data-field="comment" data-value="${item.coment}">${item.comment}</div>
                         <div data-field="date" data-value="${item.date}">${new Date(item.date).toLocaleDateString()}</div>
                     </div>
                     <div class="col s2 no-p-l">
@@ -242,8 +290,7 @@
     }
 
     /**
-     * Находит все элементы таблицы и вешает на каждый обработчики
-     * редактирования и удаления
+     * Находит все элементы таблицы и вешает на каждый обраобтчики редактирования и удаления
      * @param {HTMLElement} table - таблица элементов категории
      */
     function addItemsHandlers(table) {
@@ -262,21 +309,20 @@
     }
 
     /**
-     * Редактирование элемента категории
-     * сюда нужно будет прикрутить запрос к серверу
+     * Вызов окна редактирования элемента
      * @param {Object} event - событие
      */
     function editItem(event) {
-        var modal = document.querySelector('#item-params'); // получили модальное окно
-        var item = this.parent('js-item'); // получили элемент, на котором сработало событие
-        var data = getItemData(item); // получили данные этого элемента
+        var modal = document.querySelector('#item-params');
+        var item = this.parent('js-item');
+        var data = getItemData(item);
 
-        setFormFields(modal, data); // заполнили модальное окно данными
-        openModal(); // открыли модальное окно
+        setFormFields(modal, data);
+        openModal();
     }
 
     /**
-     * Получиение данных конкретного ээлемента категории
+     * Получение данных конкретного элемена категори
      * @param {HTMLElement} item - событие
      * @returns {Object} - данные элемента категории
      */
@@ -316,11 +362,18 @@
 
     /**
      * Удаление элемента категории
-     * сюда нужно будет прикрутить запрос к серверу
+     * API Client: delete item
      * @param {Object} event - событие
      */
     function removeItem(event) {
         var item = this.parent('js-item');
+	var id = $(item).find('[data-field=id]').attr('data-value');
+	var request = "/api/item/?token="+token+"&id="+id;
+	$.ajax({
+		url: request,
+		type: "DELETE",
+		error: function(data){ alert("Ошибка: "+data); }
+	});
         item.parentNode.removeChild(item);
     }
 
@@ -342,27 +395,45 @@
     }
 
     /**
-     * Добавляет в категорию новый / редактирует старый элемент
-     * сюда нужно будет прикрутить запрос к серверу
+     * Добавляет или редактирует элемент
+     * API Client: update item, add item
      */
     function editCategoryItem() {
-        var table = document.querySelector('#category-items'); // таблица элементов категории
-        var modal = document.querySelector('#item-params'); // форма из модального окна
-        var data = formHandler(modal); // получили данные из этой формы
+        var table = document.querySelector('#category-items');
+        var modal = document.querySelector('#item-params');
+        var data = formHandler(modal);
 
-        if (data.id) { // значит это редактирование старого элемента категории
+        if (data.id) {
+            // редактируем имеющийся
+            console.log(data);
             var idField = table.querySelector('[data-field="id"][data-value="'+ data.id +'"]');
             var item = idField.parent('js-item');
             var wrap = document.createElement('div');
 
             wrap.insertAdjacentHTML('afterBegin', getItemHTMLString(data));
             item.parentNode.replaceChild(wrap.firstElementChild, item);
-        } else { // значит добавляем новый элемент
+        } else {
+            // добавляем новый элемент
+	    data["token"] = token;
+	    //console.log(data);
+	    data["category"] = categoriesRus.indexOf(data["category"])+1;
+	    // преобрзовать дату
+	    var convdate = new Date(data["date"]);
+	    data["date"] = convdate.getFullYear() + "." + (convdate.getMonth()+1) + "." + convdate.getDate();
+	    console.log(data);
+	    var request = "/api/item/";
+	    $.ajax({
+		url: request,
+		data: data,
+		type: "POST",
+		success: function(data){ console.log(data); },
+		error: function(data){ alert(data); }
+	    });
             table.insertAdjacentHTML('beforeEnd', getItemHTMLString(data));
         }
 
-        closeModal(); // закрываем модальное окно
-        addItemsHandlers(table); // вешаем на элементы категгории обработчики
+        closeModal();
+        addItemsHandlers(table);
     }
 
     // привязываем обработчики после полной загрузки страницы
